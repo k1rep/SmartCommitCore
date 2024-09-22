@@ -82,7 +82,7 @@ public class Evaluation {
     for (String repoName : repoNames) {
       for (int step : steps) {
         executor.submit(() -> {
-          MongoClient mongoClient = new MongoClient(new MongoClientURI(mongoDBUrl));
+          MongoClient mongoClient = null;
           try {
             mongoClient = new MongoClient(new MongoClientURI(mongoDBUrl));
             String repoPath = repoDir + repoName;

@@ -6,14 +6,13 @@ plugins {
 group 'SmartCommitCore'
 version '1.0'
 
-sourceCompatibility = 1.8
+sourceCompatibility = 17
 
 repositories {
-//    mavenCentral()
     maven { url 'https://plugins.gradle.org/m2/' }
-    maven { url 'http://maven.aliyun.com/nexus/content/repositories/google' }
-    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
-    maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
+    maven { url 'https://maven.aliyun.com/nexus/content/repositories/google' }
+    maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }
 }
 
 //gradle.buildFinished { buildResult ->
@@ -27,25 +26,20 @@ tasks.withType(JavaCompile) {
     options.forkOptions.jvmArgs += ["-Duser.language=en"]
 }
 
-jar {
-    manifest {
-        attributes(
-                'Main-Class': 'com.github.smartcommit.evaluation.Evaluation',
-        )
-    }
-}
-
 task fatJar(type: Jar) {
-    manifest.from jar.manifest
+    manifest {
+        attributes 'Main-Class': 'com.github.smartcommit.evaluation.Evaluation'
+    }
     archiveClassifier = 'all'
     from {
-        configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
         configurations.compileClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
     } {
         exclude "META-INF/*.SF"
         exclude "META-INF/*.DSA"
         exclude "META-INF/*.RSA"
     }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     with jar
 }
 
@@ -60,9 +54,6 @@ test {
     }
 }
 
-configurations.all {
-}
-
 dependencies {
     implementation fileTree(dir: 'lib', include: ['*.jar'])
     implementation 'com.beust:jcommander:1.78'
@@ -70,16 +61,13 @@ dependencies {
     implementation 'org.jgrapht:jgrapht-core:1.3.0'
     implementation 'org.jgrapht:jgrapht-io:1.3.0'
     implementation 'info.debatty:java-string-similarity:2.0.0'
-
     implementation 'org.eclipse.jgit:org.eclipse.jgit:5.10.0.202012080955-r'
     implementation 'org.mongodb:mongo-java-driver:3.12.8'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.google.code.gson:gson:2.8.9' // 更新到最新版本
     implementation 'com.ibm.icu:icu4j:68.2'
-
     implementation 'org.apache.logging.log4j:log4j-core:2.17.0'
     implementation 'com.googlecode.juniversalchardet:juniversalchardet:1.0.3'
     implementation 'com.github.haifengl:smile-kotlin:2.6.0'
-
     testImplementation 'org.assertj:assertj-core:3.18.1'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
 }
@@ -88,16 +76,16 @@ sourceSets {
     main {
         java {
             srcDirs = ['src/main/java']
-            exclude '**/data/**' // 排除 'data/repos' 文件夹
-            exclude '**/temp/**' // 排除 'temp' 文件夹
+            exclude '**/data/**'
+            exclude '**/temp/**'
             exclude '**/subjects/**'
         }
     }
     test {
         java {
             srcDirs = ['src/test/java']
-            exclude '**/data/**' // 排除 'data/repos' 文件夹下的测试代码
-            exclude '**/temp/**' // 排除 'temp' 文件夹
+            exclude '**/data/**'
+            exclude '**/temp/**'
             exclude '**/subjects/**'
         }
     }
